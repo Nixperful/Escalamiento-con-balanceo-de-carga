@@ -8,8 +8,9 @@ var app = (function () {
     }
     
     var stompClient = null;
-
-    var addPointToCanvas = function (point) {        
+    
+    var addPointToCanvas = function (point) {    
+        console.log(point);
         var canvas = document.getElementById("canvas");
         var ctx = canvas.getContext("2d");
         ctx.beginPath();
@@ -36,10 +37,12 @@ var app = (function () {
         //subscribe to /topic/newpoint when connections succeed
         stompClient.connect({}, function (frame) {
             console.log('Connected: ' + frame);
-            stompClient.subscribe('/topic/newpoint', function (frame) {
-                alert(JSON.parse(frame.body));
+            stompClient.subscribe('/topic/newpoint', function (event) {
+                var points=JSON.parse(event.body);
+                console.log(points);
+                alert(event);
             });
-            
+              
         });
 
     };
