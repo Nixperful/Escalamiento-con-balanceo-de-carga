@@ -9,6 +9,7 @@ var app = (function () {
     
     var stompClient = null;
     var canvas;
+    var room;
     var addPointToCanvas = function (point) {    
         console.log(point);
         var ctx = canvas.getContext("2d");
@@ -32,11 +33,11 @@ var app = (function () {
         var socket = new SockJS('/stompendpoint');
         stompClient = Stomp.over(socket);
         canvas = document.getElementById("canvas");
-        
+        room= document.getElementById("rooms").value;
         //subscribe to /topic/newpoint when connections succeed
         stompClient.connect({}, function (frame) {
             console.log('Connected: ' + frame);
-            stompClient.subscribe('/topic/newpoint', function (event) {
+            stompClient.subscribe('/topic/newpoint.'+room, function (event) {
                 var coord=JSON.parse(event.body);
                 console.log(coord);
                 addPointToCanvas(coord);
@@ -49,7 +50,9 @@ var app = (function () {
 
         init: function () {
             var can = document.getElementById("canvas");
-            
+            var ctx = can.getContext("2d");
+            // Borramos el área que nos interesa
+            ctx.clearRect(0, 0, can.width,can.height);
             //websocket connection
             connectAndSubscribe();
         },
@@ -60,7 +63,7 @@ var app = (function () {
             addPointToCanvas(pt);
 
             //publicar el evento
-            stompClient.send("/topic/newpoint", {}, JSON.stringify(pt)); 
+            stompClient.send("/topic/newpoint."+room, {}, JSON.stringify(pt)); 
         },
         
         publishClickPoint: function(event){
@@ -70,7 +73,7 @@ var app = (function () {
             addPointToCanvas(pt);
 
             //publicar el evento
-            stompClient.send("/topic/newpoint", {}, JSON.stringify(pt));              
+            stompClient.send("/topic/newpoint."+room, {}, JSON.stringify(pt));              
         },
 
         disconnect: function () {
