@@ -18,6 +18,21 @@ var app = (function () {
         ctx.stroke();
     };
     
+    var drawPoligon = function (points){
+        
+        var c = canvas.getContext('2d');
+        c.fillStyle = '#f00000';
+        c.beginPath();
+        c.moveTo(points[0].x,points[0].y);
+        c.lineTo(points[1].x,points[1].y);
+        c.lineTo(points[2].x,points[2].y);
+        c.lineTo(points[3].x,points[3].y);
+        c.stroke();
+        
+        c.closePath();
+        c.fill();
+    };
+   
     
     var getMousePosition = function (evt) {
         var rect = canvas.getBoundingClientRect();
@@ -42,6 +57,12 @@ var app = (function () {
                 console.log(coord);
                 addPointToCanvas(coord);
             });
+            
+            stompClient.subscribe('/topic/newpolygon.'+room,function(event){
+                var coors = JSON.parse(event.body);
+                drawPoligon(coors);
+            });
+            
         });
      };
     
@@ -63,7 +84,7 @@ var app = (function () {
             addPointToCanvas(pt);
 
             //publicar el evento
-            stompClient.send("/topic/newpoint."+room, {}, JSON.stringify(pt)); 
+            stompClient.send("/app/newpoint."+room, {}, JSON.stringify(pt)); 
         },
         
         publishClickPoint: function(event){
@@ -73,7 +94,7 @@ var app = (function () {
             addPointToCanvas(pt);
 
             //publicar el evento
-            stompClient.send("/topic/newpoint."+room, {}, JSON.stringify(pt));              
+            stompClient.send("/app/newpoint."+room, {}, JSON.stringify(pt));              
         },
 
         disconnect: function () {
